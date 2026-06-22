@@ -22,3 +22,8 @@ uvicorn core.main:app --reload
 ## Author
 
 Mister Blockchain
+## Frontend
+
+Open `frontend/index.html` in your browser.
+
+Make sure the FastAPI server is running first.
