@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Manager</title>
+    <title>Expense Manager v2</title>
     <style>
         :root {
             --bg: #0f172a;
@@ -15,15 +15,10 @@
             --text-muted: #94a3b8;
             --border: #475569;
             --success: #22c55e;
-            --warning: #f59e0b;
             --danger: #ef4444;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -35,30 +30,17 @@
             padding: 20px;
         }
 
-        .container {
-            width: 100%;
-            max-width: 700px;
-        }
+        .container { width: 100%; max-width: 700px; }
 
-        /* ========== HEADER ========== */
         .header {
             text-align: center;
             margin-bottom: 30px;
             padding: 20px 0;
         }
 
-        .header h1 {
-            font-size: 2rem;
-            color: var(--accent);
-            margin-bottom: 5px;
-        }
+        .header h1 { font-size: 2rem; color: var(--accent); margin-bottom: 5px; }
+        .header p { color: var(--text-muted); font-size: 0.9rem; }
 
-        .header p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        /* ========== STATS CARDS ========== */
         .stats-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -82,24 +64,11 @@
             margin-bottom: 5px;
         }
 
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
+        .stat-value { font-size: 1.5rem; font-weight: bold; }
+        .stat-value.count { color: #60a5fa; }
+        .stat-value.total { color: var(--accent); }
+        .stat-value.avg { color: var(--success); }
 
-        .stat-value.count {
-            color: #60a5fa;
-        }
-
-        .stat-value.total {
-            color: var(--accent);
-        }
-
-        .stat-value.avg {
-            color: var(--success);
-        }
-
-        /* ========== ADD FORM ========== */
         .add-form {
             background: var(--card);
             border: 1px solid var(--border);
@@ -116,10 +85,7 @@
             letter-spacing: 1px;
         }
 
-        .form-row {
-            display: flex;
-            gap: 10px;
-        }
+        .form-row { display: flex; gap: 10px; }
 
         .form-row input {
             flex: 1;
@@ -130,16 +96,10 @@
             color: var(--text);
             font-size: 0.95rem;
             outline: none;
-            transition: border 0.2s;
         }
 
-        .form-row input:focus {
-            border-color: var(--accent);
-        }
-
-        .form-row input::placeholder {
-            color: var(--text-muted);
-        }
+        .form-row input:focus { border-color: var(--accent); }
+        .form-row input::placeholder { color: var(--text-muted); }
 
         .btn {
             padding: 12px 20px;
@@ -151,17 +111,9 @@
             transition: all 0.2s;
         }
 
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-        }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
 
-        .btn-primary:hover {
-            background: var(--accent-hover);
-            transform: translateY(-1px);
-        }
-
-        /* ========== TOOLBAR ========== */
         .toolbar {
             display: flex;
             justify-content: space-between;
@@ -182,11 +134,12 @@
             background: var(--input);
             color: var(--text);
             border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
         }
 
-        .btn-sm:hover {
-            background: var(--border);
-        }
+        .btn-sm:hover { background: var(--border); }
 
         .btn-danger {
             background: transparent;
@@ -197,20 +150,11 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
-            transition: all 0.2s;
         }
 
-        .btn-danger:hover {
-            background: var(--danger);
-            color: white;
-        }
+        .btn-danger:hover { background: var(--danger); color: white; }
 
-        /* ========== EXPENSE LIST ========== */
-        .expense-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+        .expense-list { display: flex; flex-direction: column; gap: 8px; }
 
         .expense-card {
             background: var(--card);
@@ -220,18 +164,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: border 0.2s;
         }
 
-        .expense-card:hover {
-            border-color: var(--accent);
-        }
+        .expense-card:hover { border-color: var(--accent); }
 
-        .expense-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+        .expense-left { display: flex; align-items: center; gap: 15px; }
 
         .expense-id {
             background: var(--input);
@@ -242,21 +179,11 @@
             font-weight: bold;
         }
 
-        .expense-desc {
-            font-weight: 500;
-        }
+        .expense-desc { font-weight: 500; }
 
-        .expense-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+        .expense-right { display: flex; align-items: center; gap: 15px; }
 
-        .expense-amount {
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: var(--accent);
-        }
+        .expense-amount { font-weight: bold; font-size: 1.1rem; color: var(--accent); }
 
         .empty-state {
             text-align: center;
@@ -267,77 +194,8 @@
             color: var(--text-muted);
         }
 
-        .empty-state .icon {
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
+        .empty-state .icon { font-size: 3rem; margin-bottom: 10px; }
 
-        /* ========== EDIT MODAL ========== */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 25px;
-            width: 90%;
-            max-width: 450px;
-        }
-
-        .modal h3 {
-            margin-bottom: 20px;
-            color: var(--accent);
-        }
-
-        .modal input {
-            width: 100%;
-            padding: 12px 15px;
-            background: var(--input);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-size: 0.95rem;
-            margin-bottom: 12px;
-            outline: none;
-        }
-
-        .modal input:focus {
-            border-color: var(--accent);
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            margin-top: 20px;
-        }
-
-        .btn-cancel {
-            background: var(--input);
-            color: var(--text);
-        }
-
-        .btn-save {
-            background: var(--success);
-            color: white;
-        }
-
-        /* ========== FOOTER ========== */
         .footer {
             text-align: center;
             margin-top: 30px;
@@ -346,21 +204,16 @@
             font-size: 0.75rem;
         }
 
-        .footer a {
-            color: var(--accent);
-            text-decoration: none;
-        }
+        .footer a { color: var(--accent); text-decoration: none; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- HEADER -->
         <div class="header">
-            <h1>💰 Expense Manager</h1>
-            <p>FastAPI Backend • In-Memory Storage • Full CRUD</p>
+            <h1>💰 Expense Manager v2</h1>
+            <p>FastAPI + Pydantic + Full CRUD</p>
         </div>
 
-        <!-- STATS -->
         <div class="stats-row">
             <div class="stat-card">
                 <div class="stat-label">Total Items</div>
@@ -376,232 +229,111 @@
             </div>
         </div>
 
-        <!-- ADD FORM -->
         <div class="add-form">
             <h3>📝 Add New Expense</h3>
             <div class="form-row">
-                <input type="text" id="input-desc" placeholder="Description (e.g. Groceries)" onkeypress="handleEnter(event)">
-                <input type="number" id="input-amount" placeholder="Amount (e.g. 25.99)" onkeypress="handleEnter(event)" step="0.01" min="0.01">
+                <input type="text" id="input-desc" placeholder="Description (e.g. Groceries)">
+                <input type="number" id="input-amount" placeholder="Amount (e.g. 25.99)" step="0.01" min="0.01">
                 <button class="btn btn-primary" onclick="addExpense()">+ Add</button>
             </div>
         </div>
 
-        <!-- TOOLBAR -->
         <div class="toolbar">
             <h3>📋 Expenses List</h3>
             <button class="btn btn-sm" onclick="loadAll()">🔄 Refresh</button>
         </div>
 
-        <!-- EXPENSE LIST -->
         <div class="expense-list" id="expense-list">
             <div class="empty-state">
                 <div class="icon">🧾</div>
                 <p>No expenses yet</p>
-                <p style="font-size: 0.8rem;">Add your first expense above!</p>
             </div>
         </div>
 
-        <!-- FOOTER -->
         <div class="footer">
             Built by <strong>Mister Blockchain</strong> •
-            <a href="http://127.0.0.1:8000/docs" target="_blank">API Docs</a> •
-            <a href="http://127.0.0.1:8000" target="_blank">API Root</a>
-        </div>
-    </div>
-
-    <!-- EDIT MODAL -->
-    <div class="modal-overlay" id="edit-modal">
-        <div class="modal">
-            <h3>✏️ Edit Expense</h3>
-            <label style="color: var(--text-muted); font-size: 0.8rem;">Description</label>
-            <input type="text" id="edit-desc" placeholder="Description">
-            <label style="color: var(--text-muted); font-size: 0.8rem;">Amount</label>
-            <input type="number" id="edit-amount" placeholder="Amount" step="0.01" min="0.01">
-            <div class="modal-buttons">
-                <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
-                <button class="btn btn-save" onclick="saveEdit()">💾 Save</button>
-            </div>
+            <a href="http://127.0.0.1:8000/docs" target="_blank">API Docs</a>
         </div>
     </div>
 
     <script>
         const API = "http://127.0.0.1:8000";
-        let currentEditId = null;
 
-        // ==========================================
-        // LOAD ON PAGE OPEN
-        // ==========================================
-        window.onload = function () {
-            loadAll();
-        };
+        window.onload = () => loadAll();
 
-        // ==========================================
-        // ENTER KEY HANDLER
-        // ==========================================
         function handleEnter(e) {
             if (e.key === "Enter") addExpense();
         }
 
-        // ==========================================
-        // ADD EXPENSE (POST)
-        // ==========================================
         async function addExpense() {
             const desc = document.getElementById("input-desc").value.trim();
             const amt = document.getElementById("input-amount").value.trim();
 
-            if (!desc || !amt) {
-                alert("⚠️ Please fill both fields!");
-                return;
+            if (!desc || !amt) return alert("Fill both fields!");
+
+            const res = await fetch(`${API}/expenses`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ description: desc, amount: parseFloat(amt) })
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                return alert(typeof err.detail === "string" ? err.detail : JSON.stringify(err.detail));
             }
 
-            try {
-                const res = await fetch(
-                    `${API}/expenses?description=${encodeURIComponent(desc)}&amount=${amt}`,
-                    { method: "POST" }
-                );
-
-                if (res.ok) {
-                    document.getElementById("input-desc").value = "";
-                    document.getElementById("input-amount").value = "";
-                    loadAll();
-                }
-            } catch (err) {
-                alert("❌ Failed to connect to server. Is FastAPI running?");
-            }
+            document.getElementById("input-desc").value = "";
+            document.getElementById("input-amount").value = "";
+            loadAll();
         }
 
-        // ==========================================
-        // LOAD ALL (GET + SUMMARY)
-        // ==========================================
         async function loadAll() {
             try {
-                // Fetch both in parallel
                 const [expRes, sumRes] = await Promise.all([
                     fetch(`${API}/expenses`),
                     fetch(`${API}/summary`)
                 ]);
 
-                const expData = await expRes.json();
-                const sumData = await sumRes.json();
+                const expenses = await expRes.json();
+                const summary = await sumRes.json();
 
-                // Update stats
-                document.getElementById("stat-count").textContent = sumData.total_expenses;
-                document.getElementById("stat-total").textContent = `$${sumData.total_amount}`;
-                document.getElementById("stat-avg").textContent = `$${sumData.average_amount}`;
+                document.getElementById("stat-count").textContent = summary.total_expenses;
+                document.getElementById("stat-total").textContent = `$${summary.total_amount}`;
+                document.getElementById("stat-avg").textContent = `$${summary.average_amount}`;
 
-                // Update list
-                renderExpenses(expData.expenses || []);
+                renderExpenses(Array.isArray(expenses) ? expenses : []);
             } catch (err) {
                 document.getElementById("expense-list").innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">⚠️</div>
-                        <p>Connection Error</p>
-                        <p style="font-size:0.8rem;">Make sure FastAPI is running on port 8000</p>
-                    </div>
-                `;
+                    <div class="empty-state"><div class="icon">⚠️</div><p>Connection Error</p></div>`;
             }
         }
 
-        // ==========================================
-        // RENDER EXPENSES
-        // ==========================================
         function renderExpenses(expenses) {
             const list = document.getElementById("expense-list");
 
             if (expenses.length === 0) {
-                list.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">🧾</div>
-                        <p>No expenses yet</p>
-                        <p style="font-size: 0.8rem;">Add your first expense above!</p>
-                    </div>
-                `;
+                list.innerHTML = `<div class="empty-state"><div class="icon">🧾</div><p>No expenses yet</p></div>`;
                 return;
             }
 
-            let html = "";
-            // Reverse so newest shows first
-            expenses.reverse().forEach(exp => {
-                html += `
-                    <div class="expense-card">
-                        <div class="expense-left">
-                            <span class="expense-id">#${exp.id}</span>
-                            <span class="expense-desc">${escapeHtml(exp.description)}</span>
-                        </div>
-                        <div class="expense-right">
-                            <span class="expense-amount">$${parseFloat(exp.amount).toFixed(2)}</span>
-                            <button class="btn btn-sm" onclick="openEditModal(${exp.id}, '${escapeHtml(exp.description)}', ${exp.amount})">✏️</button>
-                            <button class="btn-danger" onclick="deleteExpense(${exp.id})">🗑️</button>
-                        </div>
+            list.innerHTML = expenses.reverse().map(e => `
+                <div class="expense-card">
+                    <div class="expense-left">
+                        <span class="expense-id">#${e.id}</span>
+                        <span class="expense-desc">${e.description}</span>
                     </div>
-                `;
-            });
-
-            list.innerHTML = html;
+                    <div class="expense-right">
+                        <span class="expense-amount">$${parseFloat(e.amount).toFixed(2)}</span>
+                        <button class="btn-danger" onclick="deleteExpense(${e.id})">🗑️</button>
+                    </div>
+                </div>
+            `).join("");
         }
 
-        // ==========================================
-        // DELETE EXPENSE (DELETE)
-        // ==========================================
         async function deleteExpense(id) {
-            if (!confirm(`Delete expense #${id}?`)) return;
-
-            try {
-                await fetch(`${API}/expenses/${id}`, { method: "DELETE" });
-                loadAll();
-            } catch (err) {
-                alert("❌ Delete failed.");
-            }
-        }
-
-        // ==========================================
-        // EDIT EXPENSE (PUT)
-        // ==========================================
-        function openEditModal(id, desc, amount) {
-            currentEditId = id;
-            document.getElementById("edit-desc").value = desc;
-            document.getElementById("edit-amount").value = amount;
-            document.getElementById("edit-modal").classList.add("active");
-        }
-
-        function closeModal() {
-            currentEditId = null;
-            document.getElementById("edit-modal").classList.remove("active");
-        }
-
-        async function saveEdit() {
-            const desc = document.getElementById("edit-desc").value.trim();
-            const amt = document.getElementById("edit-amount").value.trim();
-
-            if (!desc || !amt) {
-                alert("⚠️ Please fill both fields!");
-                return;
-            }
-
-            try {
-                await fetch(
-                    `${API}/expenses/${currentEditId}?description=${encodeURIComponent(desc)}&amount=${amt}`,
-                    { method: "PUT" }
-                );
-                closeModal();
-                loadAll();
-            } catch (err) {
-                alert("❌ Update failed.");
-            }
-        }
-
-        // Close modal on ESC
-        document.addEventListener("keydown", function (e) {
-            if (e.key === "Escape") closeModal();
-        });
-
-        // ==========================================
-        // SECURITY: Escape HTML
-        // ==========================================
-        function escapeHtml(str) {
-            const div = document.createElement("div");
-            div.textContent = str;
-            return div.innerHTML;
+            if (!confirm(`Delete #${id}?`)) return;
+            await fetch(`${API}/expenses/${id}`, { method: "DELETE" });
+            loadAll();
         }
     </script>
 </body>
