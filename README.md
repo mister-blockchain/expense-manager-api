@@ -30,7 +30,22 @@ Full-stack CRUD application for managing expenses. Built with **FastAPI**, **SQL
 ---
 
 ## Project Structure
-
+├── core/
+│ ├── init.py
+│ ├── main.py
+│ ├── models.py
+│ ├── schemas.py
+│ └── database.py
+├── frontend/
+│ └── index.html
+├── docs/
+│ └── database-schema.drawio
+├── alembic/
+│ ├── env.py
+│ └── versions/
+├── alembic.ini
+├── requirements.txt
+└── README.md
 ---
 
 ## Installation
