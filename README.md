@@ -30,22 +30,19 @@ Full-stack CRUD application for managing expenses. Built with **FastAPI**, **SQL
 ---
 
 ## Project Structure
-├── core/
-│ ├── init.py
-│ ├── main.py
-│ ├── models.py
-│ ├── schemas.py
-│ └── database.py
-├── frontend/
-│ └── index.html
-├── docs/
-│ └── database-schema.drawio
-├── alembic/
-│ ├── env.py
-│ └── versions/
-├── alembic.ini
-├── requirements.txt
-└── README.md
+## Project Structure
+
+| File/Folder | Description |
+|-------------|-------------|
+| `core/main.py` | FastAPI application and routes |
+| `core/models.py` | SQLAlchemy database models |
+| `core/schemas.py` | Pydantic validation schemas |
+| `core/database.py` | Database connection and session |
+| `frontend/index.html` | Frontend user interface |
+| `docs/database-schema.drawio` | Database diagram |
+| `alembic/` | Database migration files |
+| `alembic.ini` | Alembic configuration |
+| `requirements.txt` | Python dependencies |
 ---
 
 ## Installation
@@ -63,7 +60,4 @@ uvicorn core.main:app --reload
 
 ## Option 2: Generate from terminal
 
-In your project folder:
 
-```bash
-echo "# Expense Manager API" > README.md
