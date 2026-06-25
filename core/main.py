@@ -1,10 +1,12 @@
-from fastapi import FastAPI, HTTPException, status, Path, Query
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, HTTPException, status, Path, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import List
 
-import re
-
-# Import our schemas
+from .database import Base, engine, get_db
+from .models import Expense
 from .schemas import (
     ExpenseCreate,
     ExpenseUpdate,
@@ -14,13 +16,26 @@ from .schemas import (
     UpdateResponse
 )
 
+
+# ==========================================
+# Startup / Shutdown
+# ==========================================
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("🚀 Starting up...")
+    Base.metadata.create_all(bind=engine)
+    yield
+    print("👋 Shutting down...")
+
+
 app = FastAPI(
     title="Expense Manager API",
-    description="CRUD API for managing expenses with Pydantic validation",
-    version="2.0.0"
+    description="CRUD API with SQLAlchemy + SQLite",
+    version="3.0.0",
+    lifespan=lifespan
 )
 
-# CORS middleware
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -28,160 +43,101 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ==========================================
-# In-memory storage
-# ==========================================
-expenses_db: dict[int, dict] = {}
-next_id: int = 1
-
 
 # ==========================================
-# Helper function
-# ==========================================
-def find_or_404(expense_id: int) -> dict:
-    """Find an expense by ID or raise 404"""
-    if expense_id not in expenses_db:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Expense with id {expense_id} not found"
-        )
-    return expenses_db[expense_id]
-
-
-# ==========================================
-# 1. GET / — Root endpoint
+# GET /
 # ==========================================
 @app.get("/")
-def root():
-    """Welcome message and total expenses count"""
+def root(db: Session = Depends(get_db)):
+    count = db.query(func.count(Expense.id)).scalar()
     return {
-        "message": "Welcome to Expense Manager API v2",
-        "total_expenses": len(expenses_db),
+        "message": "Welcome to Expense Manager API v3",
+        "total_expenses": count,
         "docs": "/docs"
     }
 
 
 # ==========================================
-# 2. POST /expenses — Create a new expense
+# POST /expenses
 # ==========================================
 @app.post(
     "/expenses",
     response_model=ExpenseResponse,
     status_code=status.HTTP_201_CREATED
 )
-def create_expense(expense: ExpenseCreate):  # ← JSON body
-    """
-    Create a new expense with Pydantic validation.
-    
-    - **description**: Must be 2-100 chars, at least one letter
-    - **amount**: Must be greater than 0, max 1,000,000
-    """
-    global next_id
-
-    new_expense = {
-        "id": next_id,
-        "description": expense.description,
-        "amount": expense.amount
-    }
-
-    expenses_db[next_id] = new_expense
-    next_id += 1
-
+def create_expense(expense: ExpenseCreate, db: Session = Depends(get_db)):
+    new_expense = Expense(
+        description=expense.description,
+        amount=expense.amount
+    )
+    db.add(new_expense)
+    db.commit()
+    db.refresh(new_expense)
     return new_expense
 
 
 # ==========================================
-# 3. GET /expenses — Get all expenses
+# GET /expenses
 # ==========================================
-@app.get(
-    "/expenses",
-    response_model=List[ExpenseResponse]
-)
-def get_all_expenses():
-    """Return all expenses in the system"""
-    return list(expenses_db.values())
+@app.get("/expenses", response_model=List[ExpenseResponse])
+def get_all_expenses(db: Session = Depends(get_db)):
+    return db.query(Expense).order_by(Expense.id.desc()).all()
 
 
 # ==========================================
-# 4. GET /expenses/{expense_id} — Get a single expense
+# GET /expenses/{expense_id}
 # ==========================================
-@app.get(
-    "/expenses/{expense_id}",
-    response_model=ExpenseResponse
-)
-def get_expense(expense_id: int = Path(..., ge=1)):
-    """
-    Return a single expense by its ID.
-    
-    - **expense_id**: Must be 1 or greater
-    """
-    return find_or_404(expense_id)
+@app.get("/expenses/{expense_id}", response_model=ExpenseResponse)
+def get_expense(expense_id: int = Path(..., ge=1), db: Session = Depends(get_db)):
+    expense = db.query(Expense).filter(Expense.id == expense_id).one_or_none()
+    if not expense:
+        raise HTTPException(status_code=404, detail=f"Expense {expense_id} not found")
+    return expense
 
 
 # ==========================================
-# 5. PUT /expenses/{expense_id} — Update an expense
+# PUT /expenses/{expense_id}
 # ==========================================
-@app.put(
-    "/expenses/{expense_id}",
-    response_model=UpdateResponse
-)
+@app.put("/expenses/{expense_id}", response_model=UpdateResponse)
 def update_expense(
     expense_id: int = Path(..., ge=1),
-    expense: ExpenseUpdate = ...
+    expense_data: ExpenseUpdate = ...,
+    db: Session = Depends(get_db)
 ):
-    """
-    Fully update an existing expense.
-    
-    - **expense_id**: ID of the expense to update
-    - **expense**: New description and amount
-    """
-    find_or_404(expense_id)
+    expense = db.query(Expense).filter(Expense.id == expense_id).one_or_none()
+    if not expense:
+        raise HTTPException(status_code=404, detail=f"Expense {expense_id} not found")
 
-    expenses_db[expense_id] = {
-        "id": expense_id,
-        "description": expense.description,
-        "amount": expense.amount
-    }
+    expense.description = expense_data.description
+    expense.amount = expense_data.amount
+    db.commit()
+    db.refresh(expense)
 
-    return {
-        "message": f"Expense {expense_id} updated successfully",
-        "expense": expenses_db[expense_id]
-    }
+    return {"message": f"Expense {expense_id} updated", "expense": expense}
 
 
 # ==========================================
-# 6. DELETE /expenses/{expense_id} — Delete an expense
+# DELETE /expenses/{expense_id}
 # ==========================================
-@app.delete(
-    "/expenses/{expense_id}",
-    response_model=DeleteResponse
-)
-def delete_expense(expense_id: int = Path(..., ge=1)):
-    """
-    Delete an expense by its ID.
-    
-    - **expense_id**: Must be 1 or greater
-    """
-    find_or_404(expense_id)
-    deleted_expense = expenses_db.pop(expense_id)
+@app.delete("/expenses/{expense_id}", response_model=DeleteResponse)
+def delete_expense(expense_id: int = Path(..., ge=1), db: Session = Depends(get_db)):
+    expense = db.query(Expense).filter(Expense.id == expense_id).one_or_none()
+    if not expense:
+        raise HTTPException(status_code=404, detail=f"Expense {expense_id} not found")
 
-    return {
-        "message": f"Expense {expense_id} deleted successfully",
-        "deleted_expense": deleted_expense
-    }
+    db.delete(expense)
+    db.commit()
+
+    return {"message": f"Expense {expense_id} deleted", "deleted_expense": expense}
 
 
 # ==========================================
-# 7. GET /summary — Financial summary
+# GET /summary
 # ==========================================
-@app.get(
-    "/summary",
-    response_model=SummaryResponse
-)
-def get_summary():
-    """Return total amount, count, and average of all expenses"""
-    count = len(expenses_db)
-    total = sum(exp["amount"] for exp in expenses_db.values())
+@app.get("/summary", response_model=SummaryResponse)
+def get_summary(db: Session = Depends(get_db)):
+    count = db.query(func.count(Expense.id)).scalar()
+    total = db.query(func.sum(Expense.amount)).scalar() or 0.0
     average = round(total / count, 2) if count > 0 else 0.0
 
     return {

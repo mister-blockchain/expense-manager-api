@@ -257,84 +257,96 @@
     </div>
 
     <script>
-        const API = "http://127.0.0.1:8000";
+    const API = "http://127.0.0.1:8000";
 
-        window.onload = () => loadAll();
+    window.onload = () => loadAll();
 
-        function handleEnter(e) {
-            if (e.key === "Enter") addExpense();
-        }
+    async function addExpense() {
+        const desc = document.getElementById("input-desc").value.trim();
+        const amt = document.getElementById("input-amount").value.trim();
 
-        async function addExpense() {
-            const desc = document.getElementById("input-desc").value.trim();
-            const amt = document.getElementById("input-amount").value.trim();
+        console.log("Adding:", desc, amt);  // DEBUG
 
-            if (!desc || !amt) return alert("Fill both fields!");
+        if (!desc || !amt) return alert("Fill both fields!");
 
+        try {
             const res = await fetch(`${API}/expenses`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ description: desc, amount: parseFloat(amt) })
             });
 
+            console.log("Status:", res.status);  // DEBUG
+
             if (!res.ok) {
                 const err = await res.json();
-                return alert(typeof err.detail === "string" ? err.detail : JSON.stringify(err.detail));
+                console.log("Error:", err);  // DEBUG
+                return alert(JSON.stringify(err.detail));
             }
+
+            const data = await res.json();
+            console.log("Created:", data);  // DEBUG
 
             document.getElementById("input-desc").value = "";
             document.getElementById("input-amount").value = "";
             loadAll();
+        } catch (e) {
+            console.log("Exception:", e);  // DEBUG
+            alert("Cannot connect to server. Is FastAPI running on port 8000?");
+        }
+    }
+
+    async function loadAll() {
+        try {
+            const [expRes, sumRes] = await Promise.all([
+                fetch(`${API}/expenses`),
+                fetch(`${API}/summary`)
+            ]);
+
+            const expenses = await expRes.json();
+            const summary = await sumRes.json();
+
+            console.log("Loaded:", expenses.length, "expenses");  // DEBUG
+
+            document.getElementById("stat-count").textContent = summary.total_expenses;
+            document.getElementById("stat-total").textContent = `$${summary.total_amount}`;
+            document.getElementById("stat-avg").textContent = `$${summary.average_amount}`;
+
+            renderExpenses(Array.isArray(expenses) ? expenses : []);
+        } catch (err) {
+            console.log("Load error:", err);  // DEBUG
+            document.getElementById("expense-list").innerHTML = `
+                <div class="empty-state"><div class="icon">⚠️</div><p>Connection Error</p></div>`;
+        }
+    }
+
+    function renderExpenses(expenses) {
+        const list = document.getElementById("expense-list");
+
+        if (expenses.length === 0) {
+            list.innerHTML = `<div class="empty-state"><div class="icon">🧾</div><p>No expenses yet</p></div>`;
+            return;
         }
 
-        async function loadAll() {
-            try {
-                const [expRes, sumRes] = await Promise.all([
-                    fetch(`${API}/expenses`),
-                    fetch(`${API}/summary`)
-                ]);
-
-                const expenses = await expRes.json();
-                const summary = await sumRes.json();
-
-                document.getElementById("stat-count").textContent = summary.total_expenses;
-                document.getElementById("stat-total").textContent = `$${summary.total_amount}`;
-                document.getElementById("stat-avg").textContent = `$${summary.average_amount}`;
-
-                renderExpenses(Array.isArray(expenses) ? expenses : []);
-            } catch (err) {
-                document.getElementById("expense-list").innerHTML = `
-                    <div class="empty-state"><div class="icon">⚠️</div><p>Connection Error</p></div>`;
-            }
-        }
-
-        function renderExpenses(expenses) {
-            const list = document.getElementById("expense-list");
-
-            if (expenses.length === 0) {
-                list.innerHTML = `<div class="empty-state"><div class="icon">🧾</div><p>No expenses yet</p></div>`;
-                return;
-            }
-
-            list.innerHTML = expenses.reverse().map(e => `
-                <div class="expense-card">
-                    <div class="expense-left">
-                        <span class="expense-id">#${e.id}</span>
-                        <span class="expense-desc">${e.description}</span>
-                    </div>
-                    <div class="expense-right">
-                        <span class="expense-amount">$${parseFloat(e.amount).toFixed(2)}</span>
-                        <button class="btn-danger" onclick="deleteExpense(${e.id})">🗑️</button>
-                    </div>
+        list.innerHTML = expenses.map(e => `
+            <div class="expense-card">
+                <div class="expense-left">
+                    <span class="expense-id">#${e.id}</span>
+                    <span class="expense-desc">${e.description}</span>
                 </div>
-            `).join("");
-        }
+                <div class="expense-right">
+                    <span class="expense-amount">$${parseFloat(e.amount).toFixed(2)}</span>
+                    <button class="btn-danger" onclick="deleteExpense(${e.id})">🗑️</button>
+                </div>
+            </div>
+        `).join("");
+    }
 
-        async function deleteExpense(id) {
-            if (!confirm(`Delete #${id}?`)) return;
-            await fetch(`${API}/expenses/${id}`, { method: "DELETE" });
-            loadAll();
-        }
-    </script>
+    async function deleteExpense(id) {
+        if (!confirm(`Delete #${id}?`)) return;
+        await fetch(`${API}/expenses/${id}`, { method: "DELETE" });
+        loadAll();
+    }
+</script>
 </body>
 </html>
