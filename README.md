@@ -58,6 +58,5 @@ uvicorn core.main:app --reload
 
 ---
 
-## Option 2: Generate from terminal
 
 
