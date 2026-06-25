@@ -1,29 +1,54 @@
 # Expense Manager API
 
-Simple CRUD API with FastAPI. No database. Just a Python dictionary.
+Full-stack CRUD application for managing expenses. Built with **FastAPI**, **SQLAlchemy**, **SQLite**, and **Vanilla JavaScript**.
 
-## How to run
+---
 
+## Features
+
+- ✅ Full CRUD operations (Create, Read, Update, Delete)
+- ✅ SQLite database with SQLAlchemy ORM
+- ✅ Pydantic validation with custom validators
+- ✅ Alembic migrations
+- ✅ Financial summary (total, average)
+- ✅ Dark-themed frontend
+- ✅ CORS enabled
+- ✅ Swagger auto-docs
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Backend | FastAPI (Python) |
+| Database | SQLite + SQLAlchemy |
+| Validation | Pydantic v2 |
+| Migrations | Alembic |
+| Frontend | HTML5 + CSS3 + Vanilla JS |
+
+---
+
+## Project Structure
+
+---
+
+## Installation
+
+```bash
+git clone https://github.com/mister-blockchain/expense-manager-api.git
+cd expense-manager-api
+python -m venv venv
+venv\Scripts\activate
 pip install -r requirements.txt
-
+alembic upgrade head
 uvicorn core.main:app --reload
 
-## API Endpoints
+---
 
-| Method | URL | What it does |
-|--------|-----|---------------|
-| POST | /expenses | Add new expense |
-| GET | /expenses | Show all expenses |
-| GET | /expenses/1 | Show expense number 1 |
-| PUT | /expenses/1 | Edit expense number 1 |
-| DELETE | /expenses/1 | Delete expense number 1 |
-| GET | /summary | Show total and average |
+## Option 2: Generate from terminal
 
-## Author
+In your project folder:
 
-Mister Blockchain
-## Frontend
-
-Open `frontend/index.html` in your browser.
-
-Make sure the FastAPI server is running first.
+```bash
+echo "# Expense Manager API" > README.md
